@@ -1,0 +1,45 @@
+{
+    "name": "Controls",
+    "maps": [
+        {
+            "name": "Gameplay",
+            "id": "f24ba45f-c1c0-4a78-9864-1e7fac1d6f24",
+            "actions": [
+                {
+                    "name": "Roll",
+                    "type": "Button",
+                    "id": "e791d590-3207-4ca8-b9f1-e540223d14c9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1c7d8c8a-7aa7-4ec9-9fd7-658172e4ea91",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c1c1ba26-8aa6-4c25-a87b-3a2383e134e8",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Roll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
