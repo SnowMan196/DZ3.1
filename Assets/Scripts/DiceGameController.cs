@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem; // обязательно нужно для InputAction
 
 public class DiceGameController : MonoBehaviour
 {
@@ -6,38 +7,40 @@ public class DiceGameController : MonoBehaviour
     [SerializeField] private DiceUIManager uiManager;
     [SerializeField] private DiceManager diceManager;
 
-    private int currentDiceCount = 2;
     private int totalResult;
 
     private void OnEnable()
     {
-        // подписки на события из UI
-        uiManager.OnDiceCountChanged.AddListener(UpdateDiceCount);
+        uiManager.OnDiceCountChanged.AddListener(diceManager.UpdateDiceCount);
         uiManager.OnRollPressed.AddListener(RollDice);
-        // подписка на событие из FaceSensor
         FaceSensor.OnFaceDetected += AddScore;
     }
 
     private void OnDisable()
     {
-        uiManager.OnDiceCountChanged.RemoveListener(UpdateDiceCount);
+        uiManager.OnDiceCountChanged.RemoveListener(diceManager.UpdateDiceCount);
         uiManager.OnRollPressed.RemoveListener(RollDice);
         FaceSensor.OnFaceDetected -= AddScore;
     }
 
-    private void UpdateDiceCount(int count)
+    // 🔹 Этот метод нужен для PlayerInput (вызов через Input System)
+    public void OnRoll(InputAction.CallbackContext ctx)
     {
-        currentDiceCount = count;
+        // Выполнится только в момент нажатия
+        if (!ctx.performed) return;
+
+        RollDice();
     }
 
-    private void RollDice()
+    // 🔹 Основной метод броска кубиков
+    public void RollDice()
     {
         totalResult = 0;
-        // сбрасываем очки и кидаем кубики
-        Debug.Log($"Бросаем {currentDiceCount} кубиков");
-        diceManager.OnRoll(new UnityEngine.InputSystem.InputAction.CallbackContext());
+        diceManager.RollAllDice();
+        Debug.Log("🎲 Кубики брошены!");
     }
 
+    // 🔹 Добавляем очки, когда FaceSensor сообщает верхнюю грань
     private void AddScore(int value)
     {
         totalResult += value;

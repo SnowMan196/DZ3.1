@@ -18,65 +18,45 @@ public class DiceUIManager : MonoBehaviour
     public UnityEvent<int> OnDiceCountChanged;
     public UnityEvent OnRollPressed;
 
-    private int diceCount;
     private int drawPoints;
     private int winPoints;
     private int losePoints;
 
     private void Awake()
     {
-        // 🔹 Инициализация случайных значений при запуске
-        diceCount = 2;
         drawPoints = Random.Range(8, 13);
         winPoints = Random.Range(13, 19);
         losePoints = Random.Range(3, 8);
 
-        // 🔹 Устанавливаем значения в поля ввода
-        diceCountInput.text = diceCount.ToString();
         drawPointsInput.text = drawPoints.ToString();
         winPointsInput.text = winPoints.ToString();
         losePointsInput.text = losePoints.ToString();
 
-        resultText.text = "Брось кубики 🎲";
+        resultText.text = " Введите количество и бросьте кубики!";
 
-        // 🔹 Подписываем события полей
         diceCountInput.onValueChanged.AddListener(OnDiceCountInputChanged);
-
-        // Кнопку связываем с методом
         rollButton.onClick.AddListener(RollButtonClicked);
     }
 
-    // Когда пользователь меняет число кубиков
     private void OnDiceCountInputChanged(string value)
     {
-        if (int.TryParse(value, out int count))
-        {
-            diceCount = Mathf.Clamp(count, 1, 10);
-            OnDiceCountChanged?.Invoke(diceCount);
-        }
+        if (int.TryParse(value, out var count))
+            OnDiceCountChanged?.Invoke(Mathf.Clamp(count, 1, 10));
     }
 
-    // 🔹 Этот метод появится в списке Unity Button → OnClick()
-    public void RollButtonClicked()
+    private void RollButtonClicked()
     {
-        Debug.Log("Кнопка 'Бросить кубики' нажата!");
         OnRollPressed?.Invoke();
     }
 
-    // 🔹 Вывод результата в UI
     public void ShowResult(int rolledSum)
     {
-        string status;
-        if (rolledSum >= winPoints)
-            status = "🏆 Победа!";
-        else if (rolledSum >= drawPoints)
-            status = "🤝 Ничья";
-        else
-            status = "💀 Поражение";
+        var status = rolledSum >= winPoints ? " Победа!" :
+            rolledSum >= drawPoints ? "⚖ Ничья" : " Поражение";
 
         resultText.text =
-            $"🎲 Выпало: {rolledSum}\n" +
-            $"⚖️ Ничья: {drawPoints}, 🏆 Победа: {winPoints}, 💀 Поражение: {losePoints}\n" +
+            $" Выпало: {rolledSum}\n" +
+            $" Ничья: {drawPoints},  Победа: {winPoints},  Поражение: {losePoints}\n" +
             $"Результат: {status}";
     }
 }

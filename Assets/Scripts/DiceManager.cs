@@ -5,43 +5,68 @@ using Random = UnityEngine.Random;
 
 public class DiceManager : MonoBehaviour
 {
+    [Header("Параметры броска")]
     [SerializeField] private float minForce = 4f;
     [SerializeField] private float maxForce = 8f;
     [SerializeField] private float maxTorque = 6f;
 
-    // Список Rigidbody всех кубиков
+    [Header("Спавн кубиков")]
+    [SerializeField] private GameObject dicePrefab;
+    [SerializeField] private Transform spawnArea;
+    [SerializeField, Range(1, 10)] private int diceCount = 1;
+
     private readonly List<Rigidbody> diceList = new();
 
-    // Регистрируем кубик
-    public void RegisterDice(GameObject dice)
+    public void UpdateDiceCount(int newCount)
     {
-        if (dice.TryGetComponent<Rigidbody>(out var rb))
+        newCount = Mathf.Clamp(newCount, 1, 10);
+        diceCount = newCount;
+        RebuildDice();
+    }
+
+    private void RebuildDice()
+    {
+        foreach (var rb in diceList)
         {
-            diceList.Add(rb);
+            if (rb != null)
+                Destroy(rb.gameObject);
         }
-        else
+        diceList.Clear();
+
+        for (var i = 0; i < diceCount; i++)
         {
-            Debug.LogWarning($"{dice.name} не имеет Rigidbody!");
+            var pos = spawnArea != null
+                ? spawnArea.position + new Vector3(i * 2f, 0, 0)
+                : new Vector3(i * 2f, 1f, 0);
+
+            var dice = Instantiate(dicePrefab, pos, Random.rotation);
+            if (dice.TryGetComponent<Rigidbody>(out var rb))
+                diceList.Add(rb);
         }
     }
 
-    // Метод для броска (подключается к InputSystem)
-    public void OnRoll(InputAction.CallbackContext ctx)
+    public void RegisterDice(GameObject dice)
     {
-        if (!ctx.performed) return;
+        if (dice.TryGetComponent<Rigidbody>(out var rb))
+            diceList.Add(rb);
+        else
+            Debug.LogWarning($"{dice.name} не имеет Rigidbody!");
+    }
 
+    // Метод броска — вызывается через DiceGameController
+    public void RollAllDice()
+    {
         foreach (var rb in diceList)
         {
-            // Сбрасываем старое движение
+            if (rb == null) continue;
+
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
 
-            // Рандомная сила
             var dir = new Vector3(Random.Range(-1f, 1f), 1f, Random.Range(-1f, 1f)).normalized;
             var force = dir * Random.Range(minForce, maxForce);
             rb.AddForce(force, ForceMode.Impulse);
 
-            // Рандомный крутящий момент
             var torque = new Vector3(
                 Random.Range(-maxTorque, maxTorque),
                 Random.Range(-maxTorque, maxTorque),
