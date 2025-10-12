@@ -2210,6 +2210,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiManager: {fileID: 1384237164}
   diceManager: {fileID: 1870440846}
+  model: {fileID: 11400000, guid: 628df56467eb80d4d8de6654ad7762c1, type: 2}
 --- !u!4 &1206541413
 Transform:
   m_ObjectHideFlags: 0
@@ -2686,9 +2687,6 @@ MonoBehaviour:
   losePointsInput: {fileID: 1823156488}
   resultText: {fileID: 1232227883}
   rollButton: {fileID: 1305019627}
-  OnDiceCountChanged:
-    m_PersistentCalls:
-      m_Calls: []
   OnRollPressed:
     m_PersistentCalls:
       m_Calls: []

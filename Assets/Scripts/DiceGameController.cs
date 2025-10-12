@@ -1,49 +1,49 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // обязательно нужно для InputAction
 
 public class DiceGameController : MonoBehaviour
 {
-    [Header("References")]
+    [Header("Ссылки на компоненты")]
     [SerializeField] private DiceUIManager uiManager;
     [SerializeField] private DiceManager diceManager;
+    [SerializeField] private DiceModel model;
 
-    private int totalResult;
+    private int _totalResult;
 
     private void OnEnable()
     {
-        uiManager.OnDiceCountChanged.AddListener(diceManager.UpdateDiceCount);
+        model.OnValuesChanged += UpdateFromModel;
         uiManager.OnRollPressed.AddListener(RollDice);
         FaceSensor.OnFaceDetected += AddScore;
     }
 
     private void OnDisable()
     {
-        uiManager.OnDiceCountChanged.RemoveListener(diceManager.UpdateDiceCount);
+        model.OnValuesChanged -= UpdateFromModel;
         uiManager.OnRollPressed.RemoveListener(RollDice);
         FaceSensor.OnFaceDetected -= AddScore;
     }
 
-    // 🔹 Этот метод нужен для PlayerInput (вызов через Input System)
-    public void OnRoll(InputAction.CallbackContext ctx)
+    private void Start()
     {
-        // Выполнится только в момент нажатия
-        if (!ctx.performed) return;
-
-        RollDice();
+        uiManager.Initialize(model);
+        UpdateFromModel();
     }
 
-    // 🔹 Основной метод броска кубиков
-    public void RollDice()
+    private void UpdateFromModel()
     {
-        totalResult = 0;
-        diceManager.RollAllDice();
-        Debug.Log("🎲 Кубики брошены!");
+        diceManager.UpdateDiceCount(model.DiceCount);
+        uiManager.UpdateUIFromModel();
     }
 
-    // 🔹 Добавляем очки, когда FaceSensor сообщает верхнюю грань
+    private void RollDice()
+    {
+        _totalResult = 0;
+        diceManager.ThrowDice();
+    }
+
     private void AddScore(int value)
     {
-        totalResult += value;
-        uiManager.ShowResult(totalResult);
+        _totalResult += value;
+        uiManager.ShowResult(_totalResult, model);
     }
 }

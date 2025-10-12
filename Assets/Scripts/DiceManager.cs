@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
 public class DiceManager : MonoBehaviour
@@ -15,7 +14,7 @@ public class DiceManager : MonoBehaviour
     [SerializeField] private Transform spawnArea;
     [SerializeField, Range(1, 10)] private int diceCount = 1;
 
-    private readonly List<Rigidbody> diceList = new();
+    private readonly List<Rigidbody> _diceList = new();
 
     public void UpdateDiceCount(int newCount)
     {
@@ -26,12 +25,12 @@ public class DiceManager : MonoBehaviour
 
     private void RebuildDice()
     {
-        foreach (var rb in diceList)
+        foreach (var rb in _diceList)
         {
             if (rb != null)
                 Destroy(rb.gameObject);
         }
-        diceList.Clear();
+        _diceList.Clear();
 
         for (var i = 0; i < diceCount; i++)
         {
@@ -41,22 +40,13 @@ public class DiceManager : MonoBehaviour
 
             var dice = Instantiate(dicePrefab, pos, Random.rotation);
             if (dice.TryGetComponent<Rigidbody>(out var rb))
-                diceList.Add(rb);
+                _diceList.Add(rb);
         }
     }
 
-    public void RegisterDice(GameObject dice)
+    public void ThrowDice()
     {
-        if (dice.TryGetComponent<Rigidbody>(out var rb))
-            diceList.Add(rb);
-        else
-            Debug.LogWarning($"{dice.name} не имеет Rigidbody!");
-    }
-
-    // Метод броска — вызывается через DiceGameController
-    public void RollAllDice()
-    {
-        foreach (var rb in diceList)
+        foreach (var rb in _diceList)
         {
             if (rb == null) continue;
 

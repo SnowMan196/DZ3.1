@@ -2,11 +2,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 public class DiceUIManager : MonoBehaviour
 {
-    [Header("UI Elements")]
+    [Header("UI элементы")]
     [SerializeField] private TMP_InputField diceCountInput;
     [SerializeField] private TMP_InputField drawPointsInput;
     [SerializeField] private TMP_InputField winPointsInput;
@@ -14,49 +13,69 @@ public class DiceUIManager : MonoBehaviour
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private Button rollButton;
 
-    [Header("Events")]
-    public UnityEvent<int> OnDiceCountChanged;
     public UnityEvent OnRollPressed;
+    private DiceModel _model;
 
-    private int drawPoints;
-    private int winPoints;
-    private int losePoints;
-
-    private void Awake()
+    public void Initialize(DiceModel model)
     {
-        drawPoints = Random.Range(8, 13);
-        winPoints = Random.Range(13, 19);
-        losePoints = Random.Range(3, 8);
+        _model = model;
+        _model.OnValuesChanged += UpdateUIFromModel;
 
-        drawPointsInput.text = drawPoints.ToString();
-        winPointsInput.text = winPoints.ToString();
-        losePointsInput.text = losePoints.ToString();
+        diceCountInput.onEndEdit.AddListener(OnDiceCountChanged);
+        winPointsInput.onEndEdit.AddListener(OnWinPointsChanged);
+        drawPointsInput.onEndEdit.AddListener(OnDrawPointsChanged);
+        losePointsInput.onEndEdit.AddListener(OnLosePointsChanged);
+        rollButton.onClick.AddListener(() => OnRollPressed?.Invoke());
 
-        resultText.text = " Введите количество и бросьте кубики!";
-
-        diceCountInput.onValueChanged.AddListener(OnDiceCountInputChanged);
-        rollButton.onClick.AddListener(RollButtonClicked);
+        UpdateUIFromModel();
     }
 
-    private void OnDiceCountInputChanged(string value)
+    private void OnDiceCountChanged(string value)
     {
         if (int.TryParse(value, out var count))
-            OnDiceCountChanged?.Invoke(Mathf.Clamp(count, 1, 10));
+            _model.DiceCount = count;
     }
 
-    private void RollButtonClicked()
+    private void OnWinPointsChanged(string value)
     {
-        OnRollPressed?.Invoke();
+        if (int.TryParse(value, out var val))
+            _model.WinPoints = val;
     }
 
-    public void ShowResult(int rolledSum)
+    private void OnDrawPointsChanged(string value)
     {
-        var status = rolledSum >= winPoints ? " Победа!" :
-            rolledSum >= drawPoints ? "⚖ Ничья" : " Поражение";
+        if (int.TryParse(value, out var val))
+            _model.DrawPoints = val;
+    }
+
+    private void OnLosePointsChanged(string value)
+    {
+        if (int.TryParse(value, out var val))
+            _model.LosePoints = val;
+    }
+
+    public void UpdateUIFromModel()
+    {
+        if (_model == null) return;
+        diceCountInput.text = _model.DiceCount.ToString();
+        drawPointsInput.text = _model.DrawPoints.ToString();
+        winPointsInput.text = _model.WinPoints.ToString();
+        losePointsInput.text = _model.LosePoints.ToString();
+    }
+
+    public void ShowResult(int rolledSum, DiceModel model)
+    {
+        string status;
+        if (rolledSum >= model.WinPoints)
+            status = "Победа!";
+        else if (rolledSum >= model.DrawPoints)
+            status = "Ничья";
+        else
+            status = "Поражение";
 
         resultText.text =
-            $" Выпало: {rolledSum}\n" +
-            $" Ничья: {drawPoints},  Победа: {winPoints},  Поражение: {losePoints}\n" +
+            $"Выпало: {rolledSum}\n" +
+            $"Ничья: {model.DrawPoints}, Победа: {model.WinPoints}, Поражение: {model.LosePoints}\n" +
             $"Результат: {status}";
     }
 }
